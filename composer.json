@@ -1,0 +1,22 @@
+{
+  "name": "storytile/jsonstructure",
+  "description": "A class to define JSON structures, with an integrated way to map JSON data onto the class properties",
+  "license": "MIT",
+  "type": "project",
+  "require-dev": {
+    "php": "^8.0",
+    "phpunit/phpunit": "^10.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Storytile\\JsonStructure\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
