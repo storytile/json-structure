@@ -1,5 +1,5 @@
 {
-  "name": "storytile/jsonstructure",
+  "name": "storytile/json-structure",
   "description": "A class to define JSON structures, with an integrated way to map JSON data onto the class properties",
   "license": "MIT",
   "type": "library",
