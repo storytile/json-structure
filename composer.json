@@ -2,7 +2,7 @@
   "name": "storytile/jsonstructure",
   "description": "A class to define JSON structures, with an integrated way to map JSON data onto the class properties",
   "license": "MIT",
-  "type": "project",
+  "type": "library",
   "require-dev": {
     "php": "^8.0",
     "phpunit/phpunit": "^10.0"
