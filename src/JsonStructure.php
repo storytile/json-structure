@@ -2,7 +2,7 @@
 
 namespace Storytile\JsonStructure;
 
-class JsonStructure
+class JsonStructure implements \JsonSerializable
 {
     protected bool $convertCamelToSnakeCase = true;
 
@@ -16,7 +16,22 @@ class JsonStructure
     }
 
     public function toArray(): array {
-        return json_decode(json_encode($this), true);
+        $result = [];
+        foreach (get_class_vars(static::class) as $property => $defaultValue) {
+            $propertyType = new \ReflectionProperty(static::class, $property);
+            if (!$propertyType->isPublic()) {
+                continue;
+            }
+            $key = $this->convertCamelToSnakeCase ? $this->camelToSnakeCase($property) : $property;
+            if ($propertyType->hasType() &&
+                !$propertyType->getType()->isBuiltin() &&
+                is_subclass_of($propertyType->getType()->getName(), JsonStructure::class)) {
+                $result[$key] = $this->{$property}->toArray();
+            }else{
+                $result[$key] = $this->{$property};
+            }
+        }
+        return $result;
     }
 
     protected function fillFromJson(array $data) {
@@ -44,5 +59,10 @@ class JsonStructure
 
     protected function camelToSnakeCase($value) {
         return ltrim(strtolower(preg_replace('/[A-Z]([A-Z](?![a-z]))*/', '_$0', $value)), '_');
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->toArray();
     }
 }
