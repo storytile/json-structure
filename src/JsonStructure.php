@@ -2,6 +2,8 @@
 
 namespace Storytile\JsonStructure;
 
+use Storytile\JsonStructure\Attributes\KebabCase;
+
 class JsonStructure implements \JsonSerializable
 {
     protected bool $convertCamelToSnakeCase = true;
@@ -22,7 +24,7 @@ class JsonStructure implements \JsonSerializable
             if (!$propertyType->isPublic()) {
                 continue;
             }
-            $key = $this->convertCamelToSnakeCase ? $this->camelToSnakeCase($property) : $property;
+            $key = $this->caseConversion($property, $propertyType);
             if ($propertyType->hasType() &&
                 !$propertyType->getType()->isBuiltin() &&
                 is_subclass_of($propertyType->getType()->getName(), JsonStructure::class)) {
@@ -36,13 +38,13 @@ class JsonStructure implements \JsonSerializable
 
     protected function fillFromJson(array $data) {
         foreach (get_class_vars(static::class) as $property => $defaultValue) {
-            $jsonKey = $this->convertCamelToSnakeCase ? $this->camelToSnakeCase($property) : $property;
+            $propertyType = new \ReflectionProperty(static::class, $property);
+            $jsonKey = $this->caseConversion($property, $propertyType);
             if (array_key_exists($jsonKey, $data)) {
                 if (is_array($data[$jsonKey])) {
                     // check if the class property is of a type that inherits JsonStructure:
                     // -> if no, directly assign the JSON value
                     // -> if yes, assign a new JsonStructure based on the property's type
-                    $propertyType = new \ReflectionProperty(static::class, $property);
                     if ($propertyType->hasType() &&
                         !$propertyType->getType()->isBuiltin() &&
                         is_subclass_of($propertyType->getType()->getName(), JsonStructure::class)) {
@@ -55,6 +57,21 @@ class JsonStructure implements \JsonSerializable
                 }
             }
         }
+    }
+
+    protected function caseConversion(int|string $value, \ReflectionProperty $reflectionProperty)
+    {
+        if ($this->convertCamelToSnakeCase) {
+            $value = $this->camelToSnakeCase($value);
+        }
+
+        if (count($reflectionProperty->getAttributes(KebabCase::class)) > 0) {
+            if (!$this->convertCamelToSnakeCase) {
+                $value = $this->camelToSnakeCase($value);
+            }
+            $value = str_replace("_", "-", $value);
+        }
+        return $value;
     }
 
     protected function camelToSnakeCase($value) {

@@ -11,9 +11,9 @@ class AssignArrayTest extends TestCase
         $filled = TestStructureArrays::fromJson([
             "test_a" => ["Hello A"]
         ]);
-        $this->assertEqualsCanonicalizing(["Hello A"], $filled->testA);
-        $this->assertEqualsCanonicalizing(["b" => "default b"], $filled->test);
-        $this->assertEqualsCanonicalizing(["default c"], $filled->test_s);
+        $this->assertEquals(["Hello A"], $filled->testA);
+        $this->assertEquals(["b" => "default b"], $filled->test);
+        $this->assertEquals(["default c"], $filled->test_s);
     }
 
     public function testFillMultipleValues() {
@@ -22,9 +22,9 @@ class AssignArrayTest extends TestCase
             "test" => ["test" => "Hello B"],
             "test_s" => ["Hello C"]
         ]);
-        $this->assertEqualsCanonicalizing(["Hello A"], $filled->testA);
-        $this->assertEqualsCanonicalizing(["test" => "Hello B"], $filled->test);
-        $this->assertEqualsCanonicalizing(["Hello C"], $filled->test_s);
+        $this->assertEquals(["Hello A"], $filled->testA);
+        $this->assertEquals(["test" => "Hello B"], $filled->test);
+        $this->assertEquals(["Hello C"], $filled->test_s);
     }
 }
 

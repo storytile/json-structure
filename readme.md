@@ -43,3 +43,13 @@ By default, `JsonStructure` will convert the PHP property name from camelCase to
 the provided JSON data. So for `public string $preferredColor` it will look for `preferred_color` in the JSON data.
 
 You can disable this behavior by overwriting `protected bool $convertCamelToSnakeCase = true` in your structure class.
+
+## camelCase to kebab-case
+As mentioned, by default the property names will be converted to snake_case. You can however use the attribute `#[KebabCase]` to have an individual variable be converted to kebab-case instead.
+```PHP
+class MyDataStructure extends JsonStructure {
+    #[KebabCase]
+    public string $camelCaseVariable = "red";
+}
+```
+This works independent of the snake_case setting, but is (currently) only possible with single properties.

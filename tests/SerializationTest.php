@@ -10,7 +10,7 @@ class SerializationTest extends TestCase
     public function testJsonEncode() {
         $encoded = json_encode(new SerializationStructure());
         $decoded = json_decode($encoded, true);
-        $this->assertEqualsCanonicalizing([
+        $this->assertEquals([
             "name" => "Peter",
             "sizes" => [
                 12, 13, 14
@@ -23,7 +23,7 @@ class SerializationTest extends TestCase
 
     public function testToArray() {
         $array = (new SerializationStructure())->toArray();
-        $this->assertEqualsCanonicalizing([
+        $this->assertEquals([
             "name" => "Peter",
             "sizes" => [
                 12, 13, 14
