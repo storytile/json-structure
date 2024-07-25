@@ -7,18 +7,19 @@ use Storytile\JsonStructure\Attributes\KebabCase;
 class JsonStructure implements \JsonSerializable
 {
     protected bool $convertCamelToSnakeCase = true;
+    protected array $jsonStructureUnmappedData = [];
 
-    public static function fromJson(array|string $data): static {
+    public static function fromJson(array|string $data, bool $keepUnmappedKeys = true): static {
         if (is_string($data)) {
             $data = json_decode($data, true);
         }
         $class = new static();
-        $class->fillFromJson($data);
+        $class->fillFromJson($data, $keepUnmappedKeys);
         return $class;
     }
 
     public function toArray(): array {
-        $result = [];
+        $result = $this->jsonStructureUnmappedData;
         foreach (get_class_vars(static::class) as $property => $defaultValue) {
             $propertyType = new \ReflectionProperty(static::class, $property);
             if (!$propertyType->isPublic()) {
@@ -36,7 +37,7 @@ class JsonStructure implements \JsonSerializable
         return $result;
     }
 
-    protected function fillFromJson(array $data) {
+    protected function fillFromJson(array $data, bool $keepUnmappedKeys) {
         foreach (get_class_vars(static::class) as $property => $defaultValue) {
             $propertyType = new \ReflectionProperty(static::class, $property);
             $jsonKey = $this->caseConversion($property, $propertyType);
@@ -55,7 +56,14 @@ class JsonStructure implements \JsonSerializable
                 }else{
                     $this->{$property} = $data[$jsonKey];
                 }
+                unset($data[$jsonKey]);
             }
+        }
+
+        if ($keepUnmappedKeys) {
+            $this->jsonStructureUnmappedData = $data;
+        }else{
+            $this->jsonStructureUnmappedData = [];
         }
     }
 
