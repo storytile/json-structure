@@ -2,6 +2,7 @@
 
 namespace Storytile\JsonStructure;
 
+use Storytile\JsonStructure\Attributes\ArrayOf;
 use Storytile\JsonStructure\Attributes\KebabCase;
 
 class JsonStructure implements \JsonSerializable
@@ -39,20 +40,35 @@ class JsonStructure implements \JsonSerializable
 
     protected function fillFromJson(array $data, bool $keepUnmappedKeys) {
         foreach (get_class_vars(static::class) as $property => $defaultValue) {
-            $propertyType = new \ReflectionProperty(static::class, $property);
-            $jsonKey = $this->caseConversion($property, $propertyType);
+            $reflectionProperty = new \ReflectionProperty(static::class, $property);
+            $jsonKey = $this->caseConversion($property, $reflectionProperty);
             if (array_key_exists($jsonKey, $data)) {
                 if (is_array($data[$jsonKey])) {
-                    // check if the class property is of a type that inherits JsonStructure:
-                    // -> if no, directly assign the JSON value
-                    // -> if yes, assign a new JsonStructure based on the property's type
-                    if ($propertyType->hasType() &&
-                        !$propertyType->getType()->isBuiltin() &&
-                        is_subclass_of($propertyType->getType()->getName(), JsonStructure::class)) {
-                        $this->{$property} = $propertyType->getType()->getName()::fromJson($data[$jsonKey]);
+                    $propertyType = $reflectionProperty->getType();
+                    if ($propertyType &&
+                        !$propertyType->isBuiltin() &&
+                        is_subclass_of($propertyType->getName(), JsonStructure::class)) {
+                        // check if the class property is of a type that inherits JsonStructure
+
+                        $this->{$property} = $propertyType->getName()::fromJson($data[$jsonKey]);
+                    }elseif ($propertyType &&
+                        $propertyType->getName() === "array" &&
+                        count($reflectionProperty->getAttributes(ArrayOf::class)) > 0) {
+                        // check if the property is an array and typed via the ArrayOf attribute
+
+                        $typeAttribute = $reflectionProperty->getAttributes(ArrayOf::class)[0]->newInstance();
+                        if (is_subclass_of($typeAttribute->getType(), JsonStructure::class)) {
+                            $this->{$property} = array_map(function ($value) use ($typeAttribute) {
+                                return $typeAttribute->getType()::fromJson($value);
+                            }, $data[$jsonKey]);
+                        }else{
+                            $this->{$property} = $data[$jsonKey];
+                        }
+
                     }else{
                         $this->{$property} = $data[$jsonKey];
                     }
+
                 }else{
                     $this->{$property} = $data[$jsonKey];
                 }

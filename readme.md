@@ -77,3 +77,20 @@ class MyDataStructure extends JsonStructure {
 }
 ```
 This works independent of the snake_case setting, but is (currently) only possible with single properties.
+
+## Typed Arrays
+As JSON structures often contain arrays of more structured data, you can use `#[ArrayOf(OtherJsonStructure::class)]` to type an array. Otherwise, the `JsonStructure` won't be able to apply any structure to the array content.
+You can additionally use an `@var array<InnerStructure>` with most IDEs to enable type hinting.
+```PHP
+class OuterStructure extends JsonStructure {
+    /**
+     * @var array<InnerStructure> 
+     */
+    #[ArrayOf(InnerStructure::class)]
+    public array $innerStructure = [];
+}
+
+class InnerStructure extends JsonStructure {
+    public string $details = "";
+}
+```
